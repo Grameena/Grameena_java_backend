@@ -5,27 +5,40 @@ import grameena.grameena_java_backend.dto.CompleteProfileResponse;
 import grameena.grameena_java_backend.dto.ProfileResponse;
 import grameena.grameena_java_backend.entity.User;
 import grameena.grameena_java_backend.repository.UserRepository;
+import grameena.grameena_java_backend.security.JwtService;
 import org.springframework.stereotype.Service;
+import grameena.grameena_java_backend.dto.UpdateProfileRequest;
+import grameena.grameena_java_backend.dto.ProfileResponse;
+
+import grameena.grameena_java_backend.entity.User;
+
+import java.math.BigDecimal;
 
 @Service
 public class UserService {
-
+    private final JwtService jwtService;
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService=jwtService;
     }
     public CompleteProfileResponse completeProfile(
             String phoneNumber,
             CompleteProfileRequest request) {
-        User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setUsername(request.getUsername());
-        user.setAge(request.getAge());
-        user.setHaveAgriculturalLand(request.getHaveAgriculturalLand());
-        user.setAcres(request.getAcres());
+        User user = getUserByPhoneNumber(phoneNumber);
+        updateUserFields(
+                user,
+                request.getUsername(),
+                request.getAge(),
+                request.getHaveAgriculturalLand(),
+                request.getAcres()
+        );
         user.setIsFirstLogin(false);
+
         user = userRepository.save(user);
+        String token = jwtService.generateToken(user);
+
         return new CompleteProfileResponse(
                 user.getUserId(),
                 user.getPhoneNumber(),
@@ -33,12 +46,61 @@ public class UserService {
                 user.getAge(),
                 user.getHaveAgriculturalLand(),
                 user.getAcres(),
-                user.getIsFirstLogin()
+
+                user.getIsFirstLogin(),
+                token
         );
     }
     public ProfileResponse getProfile(String phoneNumber) {
-        User user = userRepository.findByPhoneNumber(phoneNumber)
+        User user = getUserByPhoneNumber(phoneNumber);
+        return buildProfileResponse(user);
+    }
+    public ProfileResponse updateProfile(
+            String phoneNumber,
+            UpdateProfileRequest request){
+        User user = getUserByPhoneNumber(phoneNumber);
+        updateUserFields(
+                user,
+                request.getUsername(),
+                request.getAge(),
+                request.getHaveAgriculturalLand(),
+                request.getAcres()
+        );
+
+        user.setEmail(request.getEmail());
+        userRepository.save(user);
+        return buildProfileResponse(user);
+    }
+    public String deactivateProfile(String phoneNumber) {
+
+        User user = getUserByPhoneNumber(phoneNumber);
+        user.setIsActive(false);
+        user.setJwtVersion(user.getJwtVersion() + 1);
+
+        userRepository.save(user);
+
+        return "Profile deactivated successfully";
+    }
+
+    private User getUserByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private void updateUserFields(
+            User user,
+            String username,
+            Integer age,
+            Boolean haveAgriculturalLand,
+            BigDecimal acres) {
+
+        user.setUsername(username);
+        user.setAge(age);
+        user.setHaveAgriculturalLand(haveAgriculturalLand);
+        user.setAcres(acres);
+    }
+
+    private ProfileResponse buildProfileResponse(User user) {
 
         ProfileResponse response = new ProfileResponse();
 
@@ -53,4 +115,5 @@ public class UserService {
 
         return response;
     }
+
 }

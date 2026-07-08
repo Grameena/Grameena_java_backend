@@ -1,7 +1,8 @@
 package grameena.grameena_java_backend.security;
-
+import grameena.grameena_java_backend.repository.UserRepository;
 import grameena.grameena_java_backend.security.CustomUserDetails;
 import grameena.grameena_java_backend.security.CustomUserDetailsService;
+import grameena.grameena_java_backend.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import jakarta.servlet.FilterChain;
@@ -16,15 +17,19 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final UserRepository userRepository;
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
-            CustomUserDetailsService customUserDetailsService) {
+            CustomUserDetailsService customUserDetailsService,
+            UserRepository userRepository
+    ) {
 
         this.jwtService = jwtService;
         this.customUserDetailsService = customUserDetailsService;
+        this.userRepository = userRepository;
     }
     @Override
     protected void doFilterInternal(
@@ -35,10 +40,12 @@ HttpServletRequest request,
             throws ServletException, IOException {
 
 
+        System.out.println("===== JWT FILTER =====");
+        System.out.println("URI: " + request.getRequestURI());
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-
+            System.out.println("Passing request to next filter");
             filterChain.doFilter(request, response);
             return;
         }
@@ -49,6 +56,15 @@ if (!jwtService.isTokenValid(jwt)) {
             return;
         }
         String phoneNumber = jwtService.extractPhoneNumber(jwt);
+        Integer jwtVersion = jwtService.extractJwtVersion(jwt);
+
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!jwtVersion.equals(user.getJwtVersion())) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
 
         UserDetails userDetails =
                 customUserDetailsService.loadUserByUsername(phoneNumber);

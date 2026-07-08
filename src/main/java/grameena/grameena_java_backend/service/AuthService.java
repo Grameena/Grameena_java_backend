@@ -57,10 +57,15 @@ user.setUsername(request.getPhoneNumber());
            // user.setRoleId(2);
 user = userRepository.save(user);
         }
-
+        if (!user.getIsActive()) {
+            throw new RuntimeException("Your account has been deactivated. Please contact the administrator.");
+        }
 
         // Step 3: Generate JWT
-        String token = jwtService.generateToken(user);
+        String token = null;
+        if (!user.getIsFirstLogin()) {
+            token = jwtService.generateToken(user);
+        }
 
         // Step 4: Return response
         return new VerifyOtpResponse(

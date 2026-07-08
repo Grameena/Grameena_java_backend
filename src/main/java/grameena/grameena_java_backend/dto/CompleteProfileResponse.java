@@ -19,4 +19,5 @@ public class CompleteProfileResponse {
     private Boolean haveAgriculturalLand;
     private BigDecimal acres;
     private Boolean isFirstLogin;
+    private String token;
 }

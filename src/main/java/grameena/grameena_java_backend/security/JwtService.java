@@ -42,7 +42,8 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject(user.getPhoneNumber())          // Store phone number as subject
-                .claim("userId", user.getUserId())       // Store userId as a custom claim
+                .claim("userId", user.getUserId())// Store userId as a custom claim
+                .claim("jwtVersion", user.getJwtVersion())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey())
@@ -104,5 +105,11 @@ public class JwtService {
         return !isTokenExpired(token);
 
     }
+    public Integer extractJwtVersion(String token) {
 
+        Claims claims = extractAllClaims(token);
+
+        return claims.get("jwtVersion", Integer.class);
+
+    }
 }
