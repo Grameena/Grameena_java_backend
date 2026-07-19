@@ -3,10 +3,10 @@ import grameena.grameena_java_backend.dto.VerifyOtpRequest;
 import grameena.grameena_java_backend.dto.VerifyOtpResponse;
 import  grameena.grameena_java_backend.dto.SendOtpRequest;
 import grameena.grameena_java_backend.entity.User;
+import grameena.grameena_java_backend.exception.BadRequestException;
 import grameena.grameena_java_backend.repository.UserRepository;
 import grameena.grameena_java_backend.security.JwtService;
 import org.springframework.stereotype.Service;
-import lombok.*;
 
 import java.util.Optional;
 
@@ -14,10 +14,7 @@ import java.util.Optional;
 public class AuthService {
 
     public void sendOtp(SendOtpRequest request) {
-
-        String otp = "1234";
-
-
+        // OTP integration placeholder (SMS provider call).
     }
 
     private final UserRepository userRepository;
@@ -33,7 +30,7 @@ public class AuthService {
 
         // Step 1: Verify OTP
         if (!"1234".equals(request.getOtp())) {
-            throw new RuntimeException("Invalid OTP");
+            throw new BadRequestException("Invalid OTP");
         }
 
         // Step 2: Check if user exists

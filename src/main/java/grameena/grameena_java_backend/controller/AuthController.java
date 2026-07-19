@@ -3,6 +3,7 @@ import grameena.grameena_java_backend.dto.SendOtpRequest;
 import grameena.grameena_java_backend.service.AuthService;
 import grameena.grameena_java_backend.dto.VerifyOtpResponse;
 import grameena.grameena_java_backend.dto.VerifyOtpRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
         }
         @PostMapping("/send-otp")
         public ResponseEntity<String> sendOtp(
-                @RequestBody SendOtpRequest request) {
+            @Valid @RequestBody SendOtpRequest request) {
 
             authService.sendOtp(request);
 
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
         }
         @PostMapping("/verify-otp")
         public ResponseEntity<VerifyOtpResponse> verifyOtp(
-                @RequestBody VerifyOtpRequest request) {
+            @Valid @RequestBody VerifyOtpRequest request) {
 
             VerifyOtpResponse response = authService.verifyOtp(request);
 
