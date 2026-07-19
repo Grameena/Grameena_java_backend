@@ -4,6 +4,7 @@ import grameena.grameena_java_backend.dto.CompleteProfileRequest;
 import grameena.grameena_java_backend.dto.CompleteProfileResponse;
 import grameena.grameena_java_backend.dto.ProfileResponse;
 import grameena.grameena_java_backend.entity.User;
+import grameena.grameena_java_backend.exception.ResourceNotFoundException;
 import grameena.grameena_java_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ public class UserService {
             String phoneNumber,
             CompleteProfileRequest request) {
         User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setUsername(request.getUsername());
         user.setAge(request.getAge());
         user.setHaveAgriculturalLand(request.getHaveAgriculturalLand());
@@ -38,7 +39,7 @@ public class UserService {
     }
     public ProfileResponse getProfile(String phoneNumber) {
         User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         ProfileResponse response = new ProfileResponse();
 
