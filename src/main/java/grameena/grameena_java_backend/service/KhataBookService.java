@@ -30,6 +30,7 @@ import grameena.grameena_java_backend.repository.projection.CategoryTransactionD
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -137,12 +138,14 @@ public class KhataBookService {
 
     public TransactionResponse createTransaction(String phoneNumber, CreateTransactionRequest request) {
         User user = getUserByPhoneNumber(phoneNumber);
-
+        System.out.println("User ID: " + user.getUserId());
+        System.out.println("Transactional Crop ID: " + request.getTransactionalCropId());
         boolean transactionalCropBelongsToUser =
                 transactionalCropRepository.existsByTransactionalCropIdAndUserId(
                         request.getTransactionalCropId(),
                         user.getUserId()
                 );
+        System.out.println("Exists: " + transactionalCropBelongsToUser);
 
         if (!transactionalCropBelongsToUser) {
             throw new ResourceNotFoundException("Transactional crop not found for logged in user");

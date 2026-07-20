@@ -1,6 +1,7 @@
 package grameena.grameena_java_backend.repository.projection;
 
 import java.math.BigDecimal;
+
 import java.time.OffsetDateTime;
 
 public interface CategoryTransactionDetailProjection {
